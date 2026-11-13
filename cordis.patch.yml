@@ -1,0 +1,14 @@
+# dsh-bean 贡献的配置层。
+#
+# 安装后这一行的 name 用包名（Node 从 profile 的依赖里解析）；
+# 开发期想直接挂源码，把 name 换成绝对路径的 index.js，见 README「本地开发」。
+- insert:
+    - id: bean-studio
+      name: dsh-bean
+      config:
+        # 录音豆 Studio 自动启动的 MCP 端点（设置里那个「MCP 服务」开关）
+        endpoint: http://127.0.0.1:8766/mcp
+        # 单次调用上限，超时给错误而不是静默挂住
+        timeoutMs: 20000
+        # 单次最多回几条录音，压住上下文占用
+        maxRecords: 5

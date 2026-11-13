@@ -25,7 +25,7 @@ dsh：你们最后说的是首年 6 折、次年回到 7.5 折，渠道要求把
 ## 安装
 
 ```sh
-dsh plugin add github:<your-account>/dsh-bean
+dsh plugin add github:Valentin106/dsh-bean
 ```
 
 > 插件会在安装时把 `cordis.patch.yml` 作为一层配置插进 profile。装完用 `dsh --dump-config` 能看到 `id: bean-studio` 这一行，再用 `dsh` 正常启动即可。
@@ -33,7 +33,7 @@ dsh plugin add github:<your-account>/dsh-bean
 想钉版本：
 
 ```sh
-dsh plugin add github:<your-account>/dsh-bean#<commit>
+dsh plugin add github:Valentin106/dsh-bean#<sha>
 ```
 
 这套安装路径是实测过的（`dsh 0.2.2-rc.1`，`pnpm 12`）：
@@ -94,7 +94,7 @@ $ dsh --profile bean --dump-config
 不用发版，直接把源码挂进 DSH：
 
 ```sh
-git clone https://github.com/<your-account>/dsh-bean.git
+git clone https://github.com/Valentin106/dsh-bean.git
 cd dsh-bean
 node test/smoke.mjs          # 自检，不需要 DSH，也不需要联网
 
@@ -125,7 +125,8 @@ node test/contract.mjs     # 对着真实的 @deepseek-ai/dsh-tools 校验工具
 **`smoke.mjs`**（70 项）覆盖：工具注册形状（名字/描述/schema/render）、`render` 与 `presentCall` 的纯函数性与脏输入健壮性（会话回放不能炸）、入口参数校验、端点不可达时的报错文案、配置边界夹紧、以及 `package.json` ↔ `cordis.patch.yml` ↔ `locale` ↔ `icon` 的清单一致性 —— 这几处错任何一条，表现都是「装上了但没生效」，最难自查。录音豆在跑时再附带一次真实调用。
 
 ```
-PASS 70   FAIL 0   SKIP 0
+PASS 70   FAIL 0   SKIP 0        # 录音豆在跑
+PASS 65   FAIL 0   SKIP 1        # 没跑，真实调用那一段整段跳过
 ```
 
 **`contract.mjs`**（32 项）用 DSH 自己的函数确认三件事，都是运行期才会炸、事后极难定位的：
@@ -135,7 +136,7 @@ PASS 70   FAIL 0   SKIP 0
 3. `execute` 的真实返回值满足自己声明的 `output.schema`（不满足 = 模型已经决定调用之后才报 isError）
 
 ```
-PASS 32   FAIL 0
+PASS 32   FAIL 0        # 录音豆在跑；没跑时 28，跳过返回值校验
 ```
 
 找不到 dsh-tools 时自动 SKIP，不影响 `smoke.mjs` 的零依赖定位。指定路径：

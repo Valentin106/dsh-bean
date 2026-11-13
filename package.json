@@ -32,6 +32,15 @@
     "mcp"
   ],
   "license": "MIT",
+  "author": "Valentin106",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Valentin106/dsh-bean.git"
+  },
+  "homepage": "https://github.com/Valentin106/dsh-bean#readme",
+  "bugs": {
+    "url": "https://github.com/Valentin106/dsh-bean/issues"
+  },
   "dsh": {
     "manifestVersion": 1,
     "bundle": {

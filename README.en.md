@@ -15,13 +15,13 @@ The library itself is **Bean Studio**, a private desktop app for the Anker recor
 ## Install
 
 ```sh
-dsh plugin add github:<your-account>/dsh-bean
+dsh plugin add github:Valentin106/dsh-bean
 ```
 
 To pin:
 
 ```sh
-dsh plugin add github:<your-account>/dsh-bean#<commit>
+dsh plugin add github:Valentin106/dsh-bean#<sha>
 ```
 
 ## Config
@@ -61,7 +61,7 @@ Deliberately chosen:
 ## Development
 
 ```sh
-git clone https://github.com/<your-account>/dsh-bean.git
+git clone https://github.com/Valentin106/dsh-bean.git
 cd dsh-bean
 node test/smoke.mjs     # self-test: no DSH, no network required
 dsh web --patch ./cordis.patch.yml

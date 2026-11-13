@@ -1,5 +1,7 @@
 # dsh-bean
 
+[![test](https://github.com/Valentin106/dsh-bean/actions/workflows/test.yml/badge.svg)](https://github.com/Valentin106/dsh-bean/actions/workflows/test.yml)
+
 把**本地录音库**接进 [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness)（`dsh`）。
 
 在对话里问一句「上周聊定价的那段说了什么」，命中的录音原文就直接回到上下文里 —— 不用打开 App，不用翻列表，不用掏设备。
@@ -152,6 +154,7 @@ DSH_TOOLS=<...>/node_modules/@deepseek-ai/dsh-tools/lib/index.js node test/contr
 | 环节 | 实测结果 |
 |---|---|
 | 安装 | `dsh plugin --profile bean add ./dsh-bean-0.1.0.tgz` → profile 的 `dsh.profile.bundles` 自动追加 `dsh-bean` |
+| 从 GitHub 安装 | `dsh plugin add github:Valentin106/dsh-bean` → `+ dsh-bean 0.1.0`，拉取约 1 分钟，配置层结果与 tarball 装法一致 |
 | 配置层 | `dsh --profile bean --dump-config` → 配置树出现 `id: bean-studio` 及其 config |
 | 加载 | 真实 `dsh web` 进程内 `apply` 执行，`ctx.tools.schemas()` 里能查到 5 个 `bean_*` 工具 |
 | 工具契约 | 模型可见的 `bean_recall.parameters` 与源码里写的 JSON Schema **逐字一致**（`description` 中文原文、`required`、`additionalProperties` 都在） |

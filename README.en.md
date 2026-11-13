@@ -1,5 +1,7 @@
 # dsh-bean
 
+[![test](https://github.com/Valentin106/dsh-bean/actions/workflows/test.yml/badge.svg)](https://github.com/Valentin106/dsh-bean/actions/workflows/test.yml)
+
 Bring your **local recording library** into [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) (`dsh`).
 
 Ask "what did we decide about pricing last Wednesday?" in chat and the matching transcript snippet lands in context — no app switching, no scrolling a list, no reaching for the device.

@@ -144,6 +144,20 @@ PASS 32   FAIL 0
 DSH_TOOLS=<...>/node_modules/@deepseek-ai/dsh-tools/lib/index.js node test/contract.mjs
 ```
 
+## 验证过什么
+
+不想只交付「应该能跑」。下面每一条都是对着真实 `dsh 0.2.2-rc.1` + `pnpm 12` 实测的：
+
+| 环节 | 实测结果 |
+|---|---|
+| 安装 | `dsh plugin --profile bean add ./dsh-bean-0.1.0.tgz` → profile 的 `dsh.profile.bundles` 自动追加 `dsh-bean` |
+| 配置层 | `dsh --profile bean --dump-config` → 配置树出现 `id: bean-studio` 及其 config |
+| 加载 | 真实 `dsh web` 进程内 `apply` 执行，`ctx.tools.schemas()` 里能查到 5 个 `bean_*` 工具 |
+| 工具契约 | 模型可见的 `bean_recall.parameters` 与源码里写的 JSON Schema **逐字一致**（`description` 中文原文、`required`、`additionalProperties` 都在） |
+| 返回值 | `execute` 对着真实录音库返回的值，通过 DSH 自己的 `validateJsonSchemaValue` 校验 |
+
+最后两行是重点：`parameters` 一致说明「裸注册 + 原生 JSON Schema」这条路线成立，不需要 `defineTool`。
+
 ## 已知限制
 
 - 内置 Web Client **不消费** `presentCall` / `presentResult`，所以现在的结果就是 DSH 原生的工具结果行。想要专门的卡片（分组、片段高亮、点一下跳回 App 那条录音），需要额外做一个 Client 插件占用 `tool.call.toolview` 槽位，见 [`docs/UI.md`](docs/UI.md)。

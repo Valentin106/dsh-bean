@@ -4,7 +4,7 @@ Bring your **local recording library** into [DeepSeek Harness](https://github.co
 
 Ask "what did we decide about pricing last Wednesday?" in chat and the matching transcript snippet lands in context — no app switching, no scrolling a list, no reaching for the device.
 
-The library itself is [Bean Studio](https://github.com/YOUR_GITHUB_NAME/bean-studio), a desktop app for the Anker recording-bean D3200: it records, transcribes locally (faster-whisper, offline, free), and recalls by *time + topic*. This repo only turns it into a DSH plugin.
+The library itself is **Bean Studio**, a private desktop app for the Anker recording-bean D3200 (not open source): it records, transcribes locally (faster-whisper, offline, free), and recalls by *time + topic*. This repo only turns it into a DSH plugin.
 
 ## Requirements
 
@@ -15,13 +15,13 @@ The library itself is [Bean Studio](https://github.com/YOUR_GITHUB_NAME/bean-stu
 ## Install
 
 ```sh
-dsh plugin add github:YOUR_GITHUB_NAME/dsh-bean
+dsh plugin add github:<your-account>/dsh-bean
 ```
 
 To pin:
 
 ```sh
-dsh plugin add github:YOUR_GITHUB_NAME/dsh-bean#<commit>
+dsh plugin add github:<your-account>/dsh-bean#<commit>
 ```
 
 ## Config
@@ -61,7 +61,7 @@ Deliberately chosen:
 ## Development
 
 ```sh
-git clone https://github.com/YOUR_GITHUB_NAME/dsh-bean.git
+git clone https://github.com/<your-account>/dsh-bean.git
 cd dsh-bean
 node test/smoke.mjs     # self-test: no DSH, no network required
 dsh web --patch ./cordis.patch.yml

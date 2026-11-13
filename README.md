@@ -4,7 +4,7 @@
 
 在对话里问一句「上周聊定价的那段说了什么」，命中的录音原文就直接回到上下文里 —— 不用打开 App，不用翻列表，不用掏设备。
 
-配套的录音库本体是 [Bean Studio](https://github.com/YOUR_GITHUB_NAME/bean-studio)（安克录音豆 D3200 的桌面端）：负责录音、本地转写（faster-whisper，离线免费）、按「时间 + 主题」召回。本仓库只是把它变成一个 DSH 插件。
+配套的录音库本体是 **Bean Studio**（安克录音豆 D3200 的桌面端，本地私有项目，未开源）：负责录音、本地转写（faster-whisper，离线免费）、按「时间 + 主题」召回。本仓库只是把它变成一个 DSH 插件。
 
 ```
 你：上周三跟渠道那边聊定价，最后定了个什么数？
@@ -25,7 +25,7 @@ dsh：你们最后说的是首年 6 折、次年回到 7.5 折，渠道要求把
 ## 安装
 
 ```sh
-dsh plugin add github:YOUR_GITHUB_NAME/dsh-bean
+dsh plugin add github:<your-account>/dsh-bean
 ```
 
 > 插件会在安装时把 `cordis.patch.yml` 作为一层配置插进 profile。装完用 `dsh --dump-config` 能看到 `id: bean-studio` 这一行，再用 `dsh` 正常启动即可。
@@ -33,7 +33,7 @@ dsh plugin add github:YOUR_GITHUB_NAME/dsh-bean
 想钉版本：
 
 ```sh
-dsh plugin add github:YOUR_GITHUB_NAME/dsh-bean#<commit>
+dsh plugin add github:<your-account>/dsh-bean#<commit>
 ```
 
 这套安装路径是实测过的（`dsh 0.2.2-rc.1`，`pnpm 12`）：
@@ -94,7 +94,7 @@ $ dsh --profile bean --dump-config
 不用发版，直接把源码挂进 DSH：
 
 ```sh
-git clone https://github.com/YOUR_GITHUB_NAME/dsh-bean.git
+git clone https://github.com/<your-account>/dsh-bean.git
 cd dsh-bean
 node test/smoke.mjs          # 自检，不需要 DSH，也不需要联网
 

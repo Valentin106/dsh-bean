@@ -191,6 +191,10 @@ ok('files 覆盖 locale/*.json', pkg.files.includes('locale/*.json'))
 
 ok('exports 暴露 ./icon', pkg.exports?.['./icon'] === './icon.svg')
 ok('exports 暴露 ./locale/*.json', Boolean(pkg.exports?.['./locale/*.json']))
+// 一旦声明了 exports，未列出的子路径就变成「不许访问」。插件管理器解析 bundle 时
+// 会去读 <包名>/package.json —— 漏了这条，安装会以 "cannot resolve profile bundle"
+// 失败，而后面的依赖明明已经装好了。
+ok('exports 暴露 ./package.json', pkg.exports?.['./package.json'] === './package.json')
 
 const iconBytes = (await readFile(new URL('icon.svg', root))).byteLength
 ok('icon 体积在 256KiB 内', iconBytes < 256 * 1024, `${iconBytes} bytes`)

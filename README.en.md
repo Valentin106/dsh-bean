@@ -55,7 +55,7 @@ None of the retrieval logic lives here — it lives in Bean Studio's MCP server.
 Deliberately chosen:
 
 - **Zero imports, zero dependencies, zero build.** Only Node built-ins (`fetch`, `AbortSignal`). Plugins run inside the host process; every dependency is another way for the install to fail, and that failure surfaces on the client side as nothing more than "the plugin doesn't work".
-- **Raw `ToolDefinition` registration** (`{ name, description, parameters, output, execute }`) instead of `defineTool`. `defineTool` is typing sugar and arg validation; a raw registration passes JSON Schema straight to the model and skips a package-resolution path. The cost is validating inputs in `execute` yourself.
+- **Raw `ToolDefinition` registration** (`{ name, description, parameters, output, execute }`) instead of `defineTool`. Not a guess: `defineTool` internally calls `parameterSchemaSpecToJsonSchema()` to compile its property-map DSL into native JSON Schema, while `register()` and `projectToolSchema()` pass `parameters` through untouched. So a raw registration must hand over JSON Schema directly; handing over the DSL fails at registration. The cost is validating inputs in `execute` yourself.
 - **Errors that tell you what to do.** An unreachable endpoint reports "open Bean Studio and check the MCP switch" instead of `ECONNREFUSED` — a dead backend is by far the most common failure.
 
 ## Development
@@ -71,11 +71,22 @@ For source-mounted development, replace `name: dsh-bean` in `cordis.patch.yml` w
 
 ## Self-test
 
-```
-PASS 48   FAIL 0   SKIP 0
+Two layers, neither needs an API key.
+
+```sh
+node test/smoke.mjs        # zero deps, no DSH install required
+node test/contract.mjs     # validates tool definitions against the real @deepseek-ai/dsh-tools
 ```
 
-Covers tool shape (name/description/schema/render), purity of `render` and `presentCall` under malformed replay args, entry validation, unreachable-endpoint messaging, config clamping, and — if Bean Studio is up — real `bean_stats` / `bean_recall` / `bean_list` calls.
+`smoke.mjs` (70 checks): tool shape, purity of `render`/`presentCall` under malformed replay args, entry validation, unreachable-endpoint messaging, config clamping, and `package.json` ↔ `cordis.patch.yml` ↔ `locale` ↔ `icon` manifest coherence — every one of which otherwise fails silently as "installed but not active".
+
+`contract.mjs` (32 checks) uses DSH's own functions to confirm three things that only break at runtime:
+
+1. `output.schema` is inside the subset `assertSupportedJsonSchema()` accepts (checked on registration)
+2. `parameters` is projected to the model **verbatim** by `projectToolSchema()` — i.e. it must be native JSON Schema, not the `defineTool` property-map DSL
+3. `execute`'s real return value satisfies its own declared `output.schema`
+
+Skips cleanly when `@deepseek-ai/dsh-tools` isn't resolvable; point it there with `DSH_TOOLS=<...>/dsh-tools/lib/index.js`.
 
 ## Limits
 

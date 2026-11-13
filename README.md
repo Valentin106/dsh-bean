@@ -36,6 +36,25 @@ dsh plugin add github:YOUR_GITHUB_NAME/dsh-bean
 dsh plugin add github:YOUR_GITHUB_NAME/dsh-bean#<commit>
 ```
 
+这套安装路径是实测过的（`dsh 0.2.2-rc.1`，`pnpm 12`）：
+
+```
+$ dsh plugin --profile bean add ./dsh-bean-0.1.0.tgz
++ dsh-bean 0.1.0
+
+$ dsh --profile bean --dump-config
+# == dsh-bean
+- id: bean-studio
+  name: dsh-bean
+  config:
+    endpoint: http://127.0.0.1:8766/mcp
+```
+
+两个踩过的坑写在 `test/smoke.mjs` 里当回归断言，不是过时注释：
+
+- `package.json` 一旦声明 `exports`，**必须**同时导出 `./package.json`。插件管理器解析 bundle 时要读它，漏了会在依赖已装好的情况下报 `cannot resolve profile bundle`。
+- 开发期挂源码要用 `file://` URL，不能直接写 `C:\...`（Node ESM 会把盘符当协议）。
+
 ## 配置
 
 默认值对大多数人够用，要改就在 profile 的 `cordis.patch.yml` 里覆盖（注意：**覆盖会整块替换 config，要重述所有需要的键**）：
@@ -67,7 +86,7 @@ dsh plugin add github:YOUR_GITHUB_NAME/dsh-bean#<commit>
 同样地，刻意选择了：
 
 - **零 import、零依赖、零构建**。只用 Node 内置的 `fetch` / `AbortSignal`。插件跑在 host 进程里，多一个依赖就多一个装不上的可能，而这类故障在客户端侧只表现为「插件不生效」。
-- **裸 `ToolDefinition` 注册**（`{ name, description, parameters, output, execute }`），不走 `defineTool`。`defineTool` 只是 TS 类型推断和参数校验的糖；裸注册的 `parameters` 直接就是模型看到的 JSON Schema，少一条包解析路径。代价是入口自己校验参数（`query` 不能空、`id` 必须是正整数）。
+- **裸 `ToolDefinition` 注册**（`{ name, description, parameters, output, execute }`），不走 `defineTool`。这条不是拍脑袋：`defineTool` 内部会调 `parameterSchemaSpecToJsonSchema()` 把「属性映射 DSL」编译成原生 JSON Schema，而 `register()` 和 `projectToolSchema()` 对 `parameters` 是**原样透传、不做编译**。所以裸注册的 `parameters` 必须直接写 JSON Schema —— 写了 DSL 会在注册期被当成属性名解析而抛错。代价是入口自己校验参数（`query` 不能空、`id` 必须是正整数），少一条包解析路径。
 - **报错要说人话**。端点连不上时不抛 `ECONNREFUSED`，而是告诉你「先打开 Bean Studio，确认设置里 MCP 是开的」—— 插件最常见的故障就是本体没启动。
 
 ## 本地开发
@@ -96,14 +115,33 @@ node -e "const {pathToFileURL}=require('node:url');console.log(pathToFileURL(pro
 
 ## 自检
 
+两层，都不需要 API Key。
+
 ```sh
-node test/smoke.mjs
+node test/smoke.mjs        # 零依赖，不用装 DSH
+node test/contract.mjs     # 对着真实的 @deepseek-ai/dsh-tools 校验工具定义
 ```
 
-覆盖：工具注册形状（名字/描述/schema/render）、`render` 与 `presentCall` 的纯函数性与脏输入健壮性（回放不炸）、入口参数校验、端点不可达时的报错文案、配置边界夹紧，以及——如果录音豆在跑——一次真实的 `bean_stats` / `bean_recall` / `bean_list` 调用。
+**`smoke.mjs`**（70 项）覆盖：工具注册形状（名字/描述/schema/render）、`render` 与 `presentCall` 的纯函数性与脏输入健壮性（会话回放不能炸）、入口参数校验、端点不可达时的报错文案、配置边界夹紧、以及 `package.json` ↔ `cordis.patch.yml` ↔ `locale` ↔ `icon` 的清单一致性 —— 这几处错任何一条，表现都是「装上了但没生效」，最难自查。录音豆在跑时再附带一次真实调用。
 
 ```
-PASS 48   FAIL 0   SKIP 0
+PASS 70   FAIL 0   SKIP 0
+```
+
+**`contract.mjs`**（32 项）用 DSH 自己的函数确认三件事，都是运行期才会炸、事后极难定位的：
+
+1. `output.schema` 落在 `assertSupportedJsonSchema()` 支持的子集内（注册时当场校验）
+2. `parameters` 被 `projectToolSchema()` 原样投影给模型 —— 即「这里写的是原生 JSON Schema」这个判断成立
+3. `execute` 的真实返回值满足自己声明的 `output.schema`（不满足 = 模型已经决定调用之后才报 isError）
+
+```
+PASS 32   FAIL 0
+```
+
+找不到 dsh-tools 时自动 SKIP，不影响 `smoke.mjs` 的零依赖定位。指定路径：
+
+```sh
+DSH_TOOLS=<...>/node_modules/@deepseek-ai/dsh-tools/lib/index.js node test/contract.mjs
 ```
 
 ## 已知限制

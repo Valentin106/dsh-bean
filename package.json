@@ -6,6 +6,7 @@
   "main": "index.js",
   "exports": {
     ".": "./index.js",
+    "./package.json": "./package.json",
     "./locale/*.json": "./locale/*.json",
     "./icon": "./icon.svg"
   },
